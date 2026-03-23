@@ -14,6 +14,18 @@ data = pd.read_excel("cleaned_agri_price_2024_2025_FIXED.xlsx")
 
 data['Price Date'] = pd.to_datetime(data['Price Date'])
 
+# CURRENT PRICE BOX
+current_price = int(data['Modal Price'].iloc[-1])
+today = pd.Timestamp.today().strftime('%Y-%m-%d')
+
+col1, col2, col3 = st.columns(3)
+
+col1.metric("Crop", "Black Gram")
+col2.metric("Today's Price (₹)", current_price)
+col3.metric("Location", "Guntur")
+
+st.caption(f"Last Updated: {today}")
+
 # moving average forecast
 window = 7
 data['MA'] = data['Modal Price'].rolling(window).mean()
@@ -43,8 +55,8 @@ st.dataframe(forecast)
 st.subheader("Forecast Graph")
 
 plt.figure(figsize=(12,5))
-plt.plot(data['Price Date'], data['Modal Price'], label='Actual')
-plt.plot(future_dates, predictions, label='Forecast')
+plt.plot(data['Price Date'], data['Modal Price'], label='Actual Price')
+plt.plot(future_dates, predictions, label='Forecast Price')
 
 plt.legend()
 plt.xticks(rotation=45)
