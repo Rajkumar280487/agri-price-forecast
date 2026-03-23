@@ -16,13 +16,16 @@ data['Price Date'] = pd.to_datetime(data['Price Date'])
 base_price = data['Modal Price'].iloc[-1]
 live_price = base_price + np.random.normal(0, 20)
 
-# buy sell signal
-if live_price > base_price:
-    signal = "BUY ▲"
+# farmer recommendation
+if live_price > base_price + 50:
+    signal = "SELL NOW"
     color = "🟢"
-else:
-    signal = "SELL ▼"
+elif live_price < base_price - 50:
+    signal = "LOW DEMAND - HOLD"
     color = "🔴"
+else:
+    signal = "HOLD CROP"
+    color = "🟡"
 
 # top dashboard
 col1, col2, col3 = st.columns(3)
@@ -31,7 +34,7 @@ col1.metric("Crop", "Black Gram")
 col2.metric("Live Price (₹)", f"{live_price:.2f}")
 col3.metric("Location", "Guntur")
 
-st.write(f"### Signal: {color} {signal}")
+st.write(f"### Farmer Recommendation: {color} {signal}")
 
 # LIVE MARKET CHART (dark theme)
 st.subheader("Live Market Chart")
