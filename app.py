@@ -67,7 +67,10 @@ data['MA'] = data['Modal Price'].rolling(window).mean()
 last_price = data['MA'].iloc[-1]
 
 future_days = 30
-future_dates = pd.date_range(start=pd.Timestamp.today(), periods=future_days)
+future_dates = pd.date_range(
+    start=data['Price Date'].iloc[-1],
+    periods=future_days
+)
 
 predictions = []
 current = last_price
