@@ -1,3 +1,9 @@
+st.markdown(
+    """
+    <meta name="google-site-verification" content="<meta name="google-site-verification" content="Or_SUTi4xFVO3p6NTW-uphsYbHA-G6BkgNnOnwufk8o" />" />
+    """,
+    unsafe_allow_html=True
+)
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
