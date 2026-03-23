@@ -2,7 +2,6 @@ import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
-import time
 
 st.set_page_config(page_title="Black Gram Price Forecast - Guntur")
 
@@ -17,24 +16,24 @@ data['Price Date'] = pd.to_datetime(data['Price Date'])
 base_price = data['Modal Price'].iloc[-1]
 live_price = base_price + np.random.normal(0, 20)
 
-# recommendation logic
+# buy sell signal
 if live_price > base_price:
-    recommendation = "SELL"
+    signal = "BUY ▲"
     color = "🟢"
 else:
-    recommendation = "HOLD"
-    color = "🟡"
+    signal = "SELL ▼"
+    color = "🔴"
 
-# current price box
+# top dashboard
 col1, col2, col3 = st.columns(3)
 
 col1.metric("Crop", "Black Gram")
 col2.metric("Live Price (₹)", f"{live_price:.2f}")
 col3.metric("Location", "Guntur")
 
-st.write(f"### Recommendation: {color} {recommendation}")
+st.write(f"### Signal: {color} {signal}")
 
-# LIVE MARKET CHART (Trading style)
+# LIVE MARKET CHART (dark theme)
 st.subheader("Live Market Chart")
 
 live_prices = []
@@ -47,14 +46,21 @@ for i in range(30):
     live_prices.append(current)
     timestamps.append(i)
 
-fig, ax = plt.subplots()
-ax.plot(timestamps, live_prices)
-ax.set_xlabel("Time")
-ax.set_ylabel("Price")
+plt.style.use('dark_background')
+
+fig, ax = plt.subplots(figsize=(10,4))
+ax.plot(timestamps, live_prices, color='red', linewidth=2)
+
+ax.set_facecolor("black")
+fig.patch.set_facecolor("black")
+
+ax.set_title("Live Black Gram Market", color="white")
+ax.set_xlabel("Time", color="white")
+ax.set_ylabel("Price", color="white")
 
 st.pyplot(fig)
 
-# forecast model
+# forecast
 window = 7
 data['MA'] = data['Modal Price'].rolling(window).mean()
 
@@ -64,7 +70,6 @@ future_days = 30
 future_dates = pd.date_range(start=pd.Timestamp.today(), periods=future_days)
 
 predictions = []
-
 current = last_price
 
 for i in range(future_days):
@@ -82,11 +87,15 @@ st.dataframe(forecast)
 
 st.subheader("Forecast Graph")
 
-plt.figure(figsize=(12,5))
-plt.plot(data['Price Date'], data['Modal Price'], label='Actual')
-plt.plot(future_dates, predictions, label='Forecast')
+plt.style.use('dark_background')
 
-plt.legend()
-plt.xticks(rotation=45)
+fig2, ax2 = plt.subplots(figsize=(12,5))
 
-st.pyplot(plt)
+ax2.plot(data['Price Date'], data['Modal Price'], label='Actual', color='white')
+ax2.plot(future_dates, predictions, label='Forecast', color='red')
+
+ax2.legend()
+ax2.set_facecolor("black")
+fig2.patch.set_facecolor("black")
+
+st.pyplot(fig2)
