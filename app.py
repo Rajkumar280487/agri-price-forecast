@@ -35,7 +35,7 @@ future_dates = pd.date_range(
 )
 
 forecast = pd.DataFrame({
-    "Date": future_dates,
+    "Date": future_dates.strftime('%Y-%m-%d'),
     "Predicted Price": predictions
 })
 
