@@ -1,21 +1,52 @@
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
+import numpy as np
+from sklearn.linear_model import LinearRegression
+
+st.set_page_config(page_title="Agricultural Price Forecast System")
 
 st.title("Agricultural Price Forecast System")
 
-# Load forecast data
-data = pd.read_excel("forecast_30_days.xlsx")
+# load historical data
+data = pd.read_excel("cleaned_agri_price_2024_2025_FIXED.xlsx")
+
+data['Price Date'] = pd.to_datetime(data['Price Date'])
+
+# ML model
+X = np.arange(len(data)).reshape(-1,1)
+y = data['Modal Price']
+
+model = LinearRegression()
+model.fit(X,y)
+
+# predict next 30 days from TODAY
+future_days = 30
+
+future_X = np.arange(len(data), len(data)+future_days).reshape(-1,1)
+predictions = model.predict(future_X)
+
+future_dates = pd.date_range(
+    start=pd.Timestamp.today(),
+    periods=future_days,
+    freq='D'
+)
+
+forecast = pd.DataFrame({
+    "Date": future_dates,
+    "Predicted Price": predictions
+})
 
 st.subheader("30 Day Price Prediction")
-st.dataframe(data)
+st.dataframe(forecast)
 
 st.subheader("Forecast Graph")
 
-fig, ax = plt.subplots()
-ax.plot(data["Date"], data["Predicted Price"])
-ax.set_xlabel("Date")
-ax.set_ylabel("Price")
-ax.set_title("30 Day Forecast")
+plt.figure(figsize=(12,5))
+plt.plot(data['Price Date'], data['Modal Price'], label='Actual')
+plt.plot(future_dates, predictions, label='Forecast')
 
-st.pyplot(fig)
+plt.legend()
+plt.xticks(rotation=45)
+
+st.pyplot(plt)
