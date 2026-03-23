@@ -8,6 +8,10 @@ st.set_page_config(page_title="Black Gram Price Forecast - Guntur")
 st.title("Black Gram Price Forecast - Venigandla, Guntur")
 st.subheader("మినుములు (Black Gram)")
 
+# today's date
+today = pd.Timestamp.today().strftime('%Y-%m-%d')
+st.write(f"### Today's Date: {today}")
+
 # load dataset
 data = pd.read_excel("cleaned_agri_price_2024_2025_FIXED.xlsx")
 data['Price Date'] = pd.to_datetime(data['Price Date'])
@@ -27,7 +31,7 @@ else:
     signal = "HOLD CROP"
     color = "🟡"
 
-# top dashboard
+# dashboard
 col1, col2, col3 = st.columns(3)
 
 col1.metric("Crop", "Black Gram")
@@ -36,17 +40,41 @@ col3.metric("Location", "Guntur")
 
 st.write(f"### Farmer Recommendation: {color} {signal}")
 
-# LIVE MARKET CHART (dark theme)
+# forecast model
+window = 7
+data['MA'] = data['Modal Price'].rolling(window).mean()
+last_price = data['MA'].iloc[-1]
+
+future_days = 30
+
+future_dates = pd.date_range(
+    start=pd.Timestamp.today(),
+    periods=future_days
+)
+
+predictions = []
+current = last_price
+
+for i in range(future_days):
+    noise = np.random.normal(0, 50)
+    current = current + noise
+    predictions.append(current)
+
+# today's prediction
+today_prediction = predictions[0]
+st.write(f"### Today's Expected Price: ₹ {today_prediction:.2f}")
+
+# LIVE MARKET CHART
 st.subheader("Live Market Chart")
 
 live_prices = []
 timestamps = []
 
-current = live_price
+current_live = live_price
 
 for i in range(30):
-    current += np.random.normal(0, 10)
-    live_prices.append(current)
+    current_live += np.random.normal(0, 10)
+    live_prices.append(current_live)
     timestamps.append(i)
 
 plt.style.use('dark_background')
@@ -63,26 +91,7 @@ ax.set_ylabel("Price", color="white")
 
 st.pyplot(fig)
 
-# forecast
-window = 7
-data['MA'] = data['Modal Price'].rolling(window).mean()
-
-last_price = data['MA'].iloc[-1]
-
-future_days = 30
-future_dates = pd.date_range(
-    start=data['Price Date'].iloc[-1],
-    periods=future_days
-)
-
-predictions = []
-current = last_price
-
-for i in range(future_days):
-    noise = np.random.normal(0, 50)
-    current = current + noise
-    predictions.append(current)
-
+# forecast table
 forecast = pd.DataFrame({
     "Date": future_dates.strftime('%Y-%m-%d'),
     "Predicted Price": predictions
@@ -91,6 +100,7 @@ forecast = pd.DataFrame({
 st.subheader("30 Day Forecast")
 st.dataframe(forecast)
 
+# forecast graph
 st.subheader("Forecast Graph")
 
 plt.style.use('dark_background')
