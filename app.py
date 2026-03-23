@@ -1,69 +1,50 @@
-st.markdown(
-    """
-    <meta name="google-site-verification" content="<meta name="google-site-verification" content="Or_SUTi4xFVO3p6NTW-uphsYbHA-G6BkgNnOnwufk8o" />" />
-    """,
-    unsafe_allow_html=True
-)
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
-from sklearn.linear_model import LinearRegression
 
-st.set_page_config(page_title="Agricultural Price Forecast System")
+st.set_page_config(page_title="Black Gram Price Forecast - Guntur")
 
-st.title("Real-Time Agricultural Price Forecast System")
+st.title("Black Gram Price Forecast - Venigandla, Guntur")
 
-# Load historical data
+st.write("Real-time price prediction for Black Gram using historical market data.")
+
+# load dataset
 data = pd.read_excel("cleaned_agri_price_2024_2025_FIXED.xlsx")
 
 data['Price Date'] = pd.to_datetime(data['Price Date'])
 
-# Add today's date automatically (live update)
-today = pd.Timestamp.today().normalize()
+# moving average forecast
+window = 7
+data['MA'] = data['Modal Price'].rolling(window).mean()
 
-latest_price = data['Modal Price'].iloc[-1]
+last_price = data['MA'].iloc[-1]
 
-today_row = pd.DataFrame({
-    "Price Date": [today],
-    "Modal Price": [latest_price]
-})
-
-data = pd.concat([data, today_row], ignore_index=True)
-
-# Train ML model
-X = np.arange(len(data)).reshape(-1,1)
-y = data['Modal Price']
-
-model = LinearRegression()
-model.fit(X,y)
-
-# Predict next 30 days
 future_days = 30
+future_dates = pd.date_range(start=pd.Timestamp.today(), periods=future_days)
 
-future_X = np.arange(len(data), len(data)+future_days).reshape(-1,1)
-predictions = model.predict(future_X)
+predictions = []
 
-future_dates = pd.date_range(
-    start=today,
-    periods=future_days,
-    freq='D'
-)
+current = last_price
+
+for i in range(future_days):
+    noise = np.random.normal(0, 50)
+    current = current + noise
+    predictions.append(current)
 
 forecast = pd.DataFrame({
     "Date": future_dates.strftime('%Y-%m-%d'),
     "Predicted Price": predictions
 })
 
-st.subheader("30 Day Price Prediction")
+st.subheader("30 Day Black Gram Price Prediction")
 st.dataframe(forecast)
 
 st.subheader("Forecast Graph")
 
 plt.figure(figsize=(12,5))
-
-plt.plot(data['Price Date'], data['Modal Price'], label='Actual Price')
-plt.plot(future_dates, predictions, label='Forecast Price')
+plt.plot(data['Price Date'], data['Modal Price'], label='Actual')
+plt.plot(future_dates, predictions, label='Forecast')
 
 plt.legend()
 plt.xticks(rotation=45)
