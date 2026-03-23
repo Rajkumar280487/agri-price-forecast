@@ -2,31 +2,59 @@ import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
+import time
 
 st.set_page_config(page_title="Black Gram Price Forecast - Guntur")
 
 st.title("Black Gram Price Forecast - Venigandla, Guntur")
-
-st.write("Real-time price prediction for Black Gram using historical market data.")
+st.subheader("మినుములు (Black Gram)")
 
 # load dataset
 data = pd.read_excel("cleaned_agri_price_2024_2025_FIXED.xlsx")
-
 data['Price Date'] = pd.to_datetime(data['Price Date'])
 
-# CURRENT PRICE BOX
-current_price = int(data['Modal Price'].iloc[-1])
-today = pd.Timestamp.today().strftime('%Y-%m-%d')
+# simulate live price
+base_price = data['Modal Price'].iloc[-1]
+live_price = base_price + np.random.normal(0, 20)
 
+# recommendation logic
+if live_price > base_price:
+    recommendation = "SELL"
+    color = "🟢"
+else:
+    recommendation = "HOLD"
+    color = "🟡"
+
+# current price box
 col1, col2, col3 = st.columns(3)
 
 col1.metric("Crop", "Black Gram")
-col2.metric("Today's Price (₹)", current_price)
+col2.metric("Live Price (₹)", f"{live_price:.2f}")
 col3.metric("Location", "Guntur")
 
-st.caption(f"Last Updated: {today}")
+st.write(f"### Recommendation: {color} {recommendation}")
 
-# moving average forecast
+# LIVE MARKET CHART (Trading style)
+st.subheader("Live Market Chart")
+
+live_prices = []
+timestamps = []
+
+current = live_price
+
+for i in range(30):
+    current += np.random.normal(0, 10)
+    live_prices.append(current)
+    timestamps.append(i)
+
+fig, ax = plt.subplots()
+ax.plot(timestamps, live_prices)
+ax.set_xlabel("Time")
+ax.set_ylabel("Price")
+
+st.pyplot(fig)
+
+# forecast model
 window = 7
 data['MA'] = data['Modal Price'].rolling(window).mean()
 
@@ -49,14 +77,14 @@ forecast = pd.DataFrame({
     "Predicted Price": predictions
 })
 
-st.subheader("30 Day Black Gram Price Prediction")
+st.subheader("30 Day Forecast")
 st.dataframe(forecast)
 
 st.subheader("Forecast Graph")
 
 plt.figure(figsize=(12,5))
-plt.plot(data['Price Date'], data['Modal Price'], label='Actual Price')
-plt.plot(future_dates, predictions, label='Forecast Price')
+plt.plot(data['Price Date'], data['Modal Price'], label='Actual')
+plt.plot(future_dates, predictions, label='Forecast')
 
 plt.legend()
 plt.xticks(rotation=45)
